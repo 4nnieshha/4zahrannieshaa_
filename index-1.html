@@ -1,0 +1,1397 @@
+<!--
+  ============================================================
+  INDONESIAN BATTLE — belajar sambil bertarung
+  Single-file HTML + CSS + JS. Tanpa framework, tanpa backend.
+  ============================================================
+
+  DEPLOY KE GITHUB + VERCEL (semua dari 1 file ini)
+
+  1) Push ke GitHub
+     git init
+     git add .
+     git commit -m "Initial commit: Indonesian Battle"
+     git branch -M main
+     git remote add origin https://github.com/USERNAME/indonesian-battle.git
+     git push -u origin main
+
+  2) Deploy ke Vercel
+     - Buka https://vercel.com/new
+     - Import repo GitHub di atas
+     - Framework Preset: "Other", build command dikosongkan
+     - Klik Deploy
+     (Tanpa GitHub: install "vercel" CLI lalu jalankan `vercel` di folder ini)
+
+  3) File ini sudah bernama index.html, jadi Vercel maupun GitHub
+     Pages langsung mengenalinya sebagai halaman utama tanpa
+     konfigurasi tambahan.
+
+  4) Dua badge "📦 GitHub" & "▲ Deploy ke Vercel" di halaman Home
+     masih memakai placeholder USERNAME/indonesian-battle.
+     Cari-ganti ke URL repo aslinya (2 tempat, atribut href,
+     di dekat class="deploy-badge" pada bagian <body>).
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Indonesian Battle — Belajar Sambil Bertarung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ================= TOKENS ================= */
+  :root{
+    --ink:#3D3852;
+    --ink-soft:#7A7390;
+    --ink-faint:#B3ADC4;
+    --paper:#FAF7FB;
+    --card:#FFFFFF;
+
+    --dusk:#6C6BA8;
+    --dusk-deep:#54528C;
+    --dusk-soft:#E8E7F5;
+
+    --teal:#4E9E96;
+    --teal-deep:#3D827B;
+    --teal-soft:#E1F1EF;
+
+    --gold:#D9A441;
+    --gold-deep:#B8842A;
+    --gold-soft:#FAF0DC;
+
+    --rose:#DC8AA0;
+    --rose-deep:#C06E85;
+    --rose-soft:#FBEAEF;
+
+    --moss:#7FA062;
+    --moss-deep:#66854B;
+    --moss-soft:#EDF3E7;
+
+    --coral:#E08A5B;
+    --coral-deep:#C06E42;
+    --coral-soft:#FBEAE0;
+
+    --sage:#6FAE7C;
+    --sage-soft:#E3F3E5;
+    --clay:#C97363;
+    --clay-soft:#F6E4E0;
+
+    --r-sm:12px;
+    --r-md:18px;
+    --r-lg:26px;
+    --r-pill:999px;
+
+    --shadow-sm:0 2px 8px rgba(61,56,82,0.06);
+    --shadow-md:0 10px 28px rgba(61,56,82,0.12);
+    --shadow-dusk:0 10px 24px rgba(108,107,168,0.28);
+
+    --font-display:'Fraunces',Georgia,serif;
+    --font-body:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:var(--font-body);
+    color:var(--ink);
+    background:linear-gradient(160deg,#EFEAF7 0%,#F7EBEF 45%,#EAF3F1 100%);
+    min-height:100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  button{font-family:inherit;}
+  p{line-height:1.5;}
+
+  /* ================= SHELL / PHONE FRAME ================= */
+  .phone-shell{
+    width:100%;
+    height:100dvh;
+    max-width:430px;
+    max-height:100dvh;
+    position:relative;
+  }
+  .app{
+    width:100%;
+    height:100%;
+    background:var(--paper);
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  @media (min-width:500px){
+    body{padding:28px;}
+    .phone-shell{
+      height:min(880px,calc(100dvh - 56px));
+      border-radius:44px;
+      padding:12px;
+      background:linear-gradient(160deg,#2A2740,#1C1A2E);
+      box-shadow:0 40px 80px rgba(30,25,50,0.35),0 0 0 2px rgba(255,255,255,0.04) inset;
+    }
+    .app{border-radius:34px;}
+    .phone-shell::before{
+      content:"";
+      position:absolute;
+      top:12px;left:50%;
+      transform:translateX(-50%);
+      width:90px;height:22px;
+      background:#1C1A2E;
+      border-radius:0 0 16px 16px;
+      z-index:50;
+    }
+  }
+
+  /* ================= SCREENS ================= */
+  .screen{
+    display:none;
+    flex-direction:column;
+    height:100%;
+    width:100%;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .screen::-webkit-scrollbar{width:0;}
+  .screen.active{
+    display:flex;
+    animation:screenIn .38s cubic-bezier(.22,.68,0,1);
+  }
+  @keyframes screenIn{
+    from{opacity:0;transform:translateY(14px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .screen.active{animation:none;}
+    *{animation-duration:.01ms !important;transition-duration:.01ms !important;}
+  }
+
+  /* ================= GUNUNGAN SIGNATURE SHAPE ================= */
+  .gunungan{
+    clip-path:polygon(
+      50% 0%,58% 8%,54% 14%,62% 18%,70% 28%,64% 32%,78% 42%,88% 55%,80% 58%,
+      92% 70%,100% 85%,90% 88%,92% 100%,
+      8% 100%,10% 88%,0% 85%,8% 70%,
+      20% 58%,12% 55%,22% 42%,36% 32%,30% 28%,38% 18%,46% 14%,42% 8%
+    );
+  }
+
+  /* ================= SPLASH ================= */
+  #screen-splash{
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(200deg,#4A4778 0%,#6C6BA8 38%,#C06E85 78%,#E0A24E 100%);
+    background-size:100% 220%;
+    animation:duskShift 5s ease-in-out infinite alternate;
+    position:relative;
+  }
+  @keyframes duskShift{
+    from{background-position:0% 0%;}
+    to{background-position:0% 100%;}
+  }
+  .splash-content{
+    display:flex;flex-direction:column;align-items:center;
+    gap:6px;padding:0 40px;text-align:center;
+    position:relative;z-index:2;
+  }
+  .splash-gunungan-wrap{
+    width:132px;height:170px;
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:22px;
+    animation:gunungFloat 3.2s ease-in-out infinite;
+  }
+  @keyframes gunungFloat{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-8px);}
+  }
+  .splash-gunungan{
+    width:100%;height:100%;
+    background:linear-gradient(180deg,#FFEBC2 0%,#F3C877 55%,#D9A441 100%);
+    box-shadow:0 0 50px 6px rgba(255,224,150,0.55);
+  }
+  .splash-title{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:38px;
+    color:#FFFFFF;
+    letter-spacing:-0.5px;
+    line-height:1.05;
+    text-shadow:0 4px 22px rgba(0,0,0,0.18);
+  }
+  .splash-title em{font-style:normal;font-weight:700;}
+  .splash-tagline{
+    font-size:14.5px;
+    font-weight:500;
+    color:rgba(255,255,255,0.88);
+    margin-top:8px;
+    letter-spacing:.2px;
+  }
+  .splash-loader{
+    width:150px;height:5px;
+    border-radius:var(--r-pill);
+    background:rgba(255,255,255,0.28);
+    margin-top:34px;
+    overflow:hidden;
+  }
+  .splash-loader-bar{
+    height:100%;width:0%;
+    background:#FFFFFF;
+    border-radius:var(--r-pill);
+    animation:loadBar 2.3s cubic-bezier(.3,.6,.4,1) forwards;
+  }
+  @keyframes loadBar{
+    0%{width:6%;}
+    100%{width:100%;}
+  }
+  .splash-loading-text{
+    margin-top:12px;
+    font-size:11.5px;
+    color:rgba(255,255,255,0.72);
+    letter-spacing:.3px;
+  }
+
+  /* ================= SHARED: header / back / section title ================= */
+  .sub-header{
+    display:flex;align-items:center;gap:12px;
+    padding:18px 20px 4px;
+    flex-shrink:0;
+  }
+  .sub-header h2{
+    font-size:17px;font-weight:700;color:var(--ink);
+  }
+  .back-btn{
+    width:38px;height:38px;flex-shrink:0;
+    border-radius:var(--r-pill);
+    border:none;
+    background:var(--card);
+    box-shadow:var(--shadow-sm);
+    color:var(--ink);
+    font-size:18px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .back-btn:active{transform:scale(0.9);}
+  .section-title{
+    font-size:15px;font-weight:800;color:var(--ink);
+    padding:26px 20px 12px;
+    display:flex;align-items:center;gap:7px;
+    flex-shrink:0;
+  }
+
+  /* ================= HOME ================= */
+  #screen-home{padding-bottom:28px;}
+  .home-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 20px 6px;
+    flex-shrink:0;
+  }
+  .home-header-left{display:flex;align-items:center;gap:11px;}
+  .logo-mark{
+    width:34px;height:44px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .logo-mark .gunungan{
+    width:100%;height:100%;
+    background:linear-gradient(180deg,var(--gold),var(--dusk));
+  }
+  .greeting{font-size:12.5px;color:var(--ink-soft);font-weight:600;}
+  .app-name-small{
+    font-family:var(--font-display);
+    font-size:19px;font-weight:600;color:var(--ink);
+    letter-spacing:-.2px;
+  }
+
+  .stats-strip{
+    display:flex;gap:10px;
+    padding:18px 20px 4px;
+    flex-shrink:0;
+  }
+  .stat-chip{
+    flex:1;
+    background:var(--card);
+    border-radius:var(--r-md);
+    padding:12px 8px;
+    text-align:center;
+    box-shadow:var(--shadow-sm);
+  }
+  .stat-chip .stat-value{
+    display:block;
+    font-family:var(--font-display);
+    font-size:20px;font-weight:600;color:var(--dusk-deep);
+  }
+  .stat-chip .stat-label{
+    display:block;
+    font-size:10.5px;font-weight:600;color:var(--ink-faint);
+    text-transform:uppercase;letter-spacing:.5px;
+    margin-top:2px;
+  }
+
+  .category-grid{
+    display:flex;flex-direction:column;gap:10px;
+    padding:0 20px;
+    flex-shrink:0;
+  }
+  .category-card{
+    display:flex;align-items:center;gap:13px;
+    background:var(--card);
+    border:none;
+    border-radius:var(--r-md);
+    padding:13px 15px;
+    box-shadow:var(--shadow-sm);
+    cursor:pointer;
+    text-align:left;
+    border-left:5px solid var(--cat-color,var(--dusk));
+    transition:transform .15s ease,box-shadow .15s ease;
+  }
+  .category-card:active{transform:scale(0.98);}
+  .category-icon{
+    width:42px;height:42px;flex-shrink:0;
+    border-radius:14px;
+    background:var(--cat-soft,var(--dusk-soft));
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+  }
+  .category-info{flex:1;min-width:0;}
+  .category-info h3{font-size:14.5px;font-weight:700;color:var(--ink);}
+  .category-info p{font-size:12px;color:var(--ink-soft);margin-top:1px;font-weight:500;}
+  .category-arrow{font-size:20px;color:var(--ink-faint);flex-shrink:0;}
+
+  .home-footnote{
+    padding:22px 24px 8px;
+    text-align:center;
+    font-size:11px;
+    color:var(--ink-faint);
+    line-height:1.6;
+  }
+  .deploy-badges{
+    display:flex;gap:8px;
+    padding:12px 24px 22px;
+  }
+  .deploy-badge{
+    flex:1;
+    display:flex;align-items:center;justify-content:center;gap:5px;
+    text-align:center;
+    font-size:11.5px;font-weight:700;
+    color:var(--ink-soft);
+    background:var(--card);
+    border:1.5px solid var(--dusk-soft);
+    border-radius:var(--r-pill);
+    padding:9px 8px;
+    text-decoration:none;
+    transition:transform .15s ease,border-color .15s ease;
+  }
+  .deploy-badge:active{transform:scale(0.96);}
+  .deploy-badge.vercel{border-color:var(--ink-faint);}
+
+  /* ================= DETAIL (reading) ================= */
+  .detail-banner{
+    flex-shrink:0;
+    height:150px;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .detail-banner-icon{font-size:52px;position:relative;z-index:2;filter:drop-shadow(0 6px 14px rgba(0,0,0,0.12));}
+  .detail-banner .gunungan{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    width:210px;height:270px;
+    opacity:.16;
+    background:#FFFFFF;
+    bottom:-70px;
+    z-index:1;
+  }
+  .detail-body{
+    flex:1;
+    padding:22px 22px 6px;
+  }
+  .detail-body h1{
+    font-family:var(--font-display);
+    font-size:22px;font-weight:600;color:var(--ink);
+    margin-bottom:4px;
+  }
+  .detail-eyebrow{
+    font-size:11px;font-weight:700;color:var(--ink-faint);
+    text-transform:uppercase;letter-spacing:.6px;
+    margin-bottom:14px;
+    display:flex;align-items:center;gap:6px;
+  }
+  .reading-content{
+    font-family:var(--font-display);
+    font-size:16.5px;
+    line-height:1.75;
+    color:var(--ink);
+    font-weight:400;
+  }
+  .reading-content p{margin-bottom:16px;}
+  .detail-footer{
+    padding:16px 22px 22px;
+    flex-shrink:0;
+  }
+
+  /* ================= BUTTONS ================= */
+  .btn-primary{
+    background:linear-gradient(135deg,var(--dusk),var(--dusk-deep));
+    color:#fff;border:none;
+    padding:15px 22px;border-radius:var(--r-md);
+    font-weight:700;font-size:15px;
+    cursor:pointer;
+    box-shadow:var(--shadow-dusk);
+    transition:transform .15s ease;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .btn-primary:active{transform:scale(0.97);}
+  .btn-secondary{
+    background:var(--card);
+    color:var(--dusk-deep);
+    border:2px solid var(--dusk-soft);
+    padding:13px 22px;border-radius:var(--r-md);
+    font-weight:700;font-size:15px;
+    cursor:pointer;
+    transition:transform .15s ease;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .btn-secondary:active{transform:scale(0.97);}
+  .btn-full{width:100%;}
+
+  /* ================= MODE SELECT ================= */
+  .mode-subtitle{
+    padding:2px 20px 14px;
+    font-size:13px;color:var(--ink-soft);font-weight:500;
+  }
+  .mode-subtitle strong{color:var(--ink);font-weight:700;}
+  .mode-list{
+    display:flex;flex-direction:column;gap:12px;
+    padding:0 20px 20px;
+  }
+  .mode-card{
+    display:flex;align-items:center;gap:14px;
+    background:var(--card);
+    border:none;border-radius:var(--r-lg);
+    padding:16px;
+    box-shadow:var(--shadow-sm);
+    cursor:pointer;text-align:left;
+    transition:transform .15s ease;
+  }
+  .mode-card:active{transform:scale(0.98);}
+  .mode-icon{
+    width:50px;height:50px;flex-shrink:0;
+    border-radius:16px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:23px;
+  }
+  .mode-icon.i-latihan{background:var(--teal-soft);}
+  .mode-icon.i-bot{background:var(--dusk-soft);}
+  .mode-icon.i-waktu{background:var(--rose-soft);}
+  .mode-info{flex:1;}
+  .mode-info h3{font-size:15px;font-weight:700;color:var(--ink);}
+  .mode-info p{font-size:12px;color:var(--ink-soft);margin-top:2px;font-weight:500;line-height:1.4;}
+
+  /* ================= BOT SELECT ================= */
+  .bot-list{display:flex;flex-direction:column;gap:12px;padding:6px 20px 20px;}
+  .bot-card{
+    display:flex;align-items:center;gap:14px;
+    background:var(--card);
+    border:none;border-radius:var(--r-lg);
+    padding:16px;
+    box-shadow:var(--shadow-sm);
+    cursor:pointer;text-align:left;
+    transition:transform .15s ease;
+  }
+  .bot-card:active{transform:scale(0.98);}
+  .bot-avatar{
+    width:54px;height:54px;flex-shrink:0;
+    border-radius:var(--r-pill);
+    display:flex;align-items:center;justify-content:center;
+    font-size:26px;
+  }
+  .bot-card[data-level="mudah"] .bot-avatar{background:var(--sage-soft);}
+  .bot-card[data-level="sedang"] .bot-avatar{background:var(--gold-soft);}
+  .bot-card[data-level="sulit"] .bot-avatar{background:var(--rose-soft);}
+  .bot-info{flex:1;}
+  .bot-info h3{font-size:15px;font-weight:700;color:var(--ink);}
+  .bot-info p{font-size:12px;color:var(--ink-soft);margin-top:2px;font-weight:500;line-height:1.4;}
+  .bot-difficulty{
+    display:inline-flex;align-items:center;gap:4px;
+    margin-top:7px;
+    font-size:10.5px;font-weight:700;
+    padding:3px 9px;border-radius:var(--r-pill);
+    text-transform:uppercase;letter-spacing:.4px;
+  }
+  .bot-difficulty.mudah{background:var(--sage-soft);color:var(--moss-deep);}
+  .bot-difficulty.sedang{background:var(--gold-soft);color:var(--gold-deep);}
+  .bot-difficulty.sulit{background:var(--rose-soft);color:var(--rose-deep);}
+
+  /* ================= GAME ================= */
+  #screen-game{padding:16px 20px 20px;}
+  .game-exit-row{flex-shrink:0;margin-bottom:10px;display:flex;}
+  .game-top{flex-shrink:0;margin-bottom:14px;min-height:64px;}
+
+  .vs-bar{
+    display:flex;align-items:center;gap:10px;
+    background:var(--card);border-radius:var(--r-md);
+    padding:14px 10px;box-shadow:var(--shadow-sm);
+  }
+  .vs-side{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;}
+  .vs-avatar{
+    width:46px;height:46px;border-radius:var(--r-pill);
+    background:var(--dusk-soft);
+    display:flex;align-items:center;justify-content:center;
+    font-size:21px;
+    transition:transform .25s ease,box-shadow .25s ease;
+  }
+  .vs-avatar.pulse-correct{box-shadow:0 0 0 5px var(--sage-soft);transform:scale(1.1);}
+  .vs-avatar.pulse-wrong{box-shadow:0 0 0 5px var(--clay-soft);transform:scale(0.94);}
+  .vs-name{font-size:10.5px;font-weight:700;color:var(--ink-soft);text-align:center;}
+  .vs-score{font-family:var(--font-display);font-size:19px;font-weight:600;color:var(--ink);}
+  .vs-mid{width:26px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .vs-mid .gunungan{width:100%;height:100%;background:linear-gradient(180deg,var(--gold),var(--rose));}
+
+  .waktu-bar,.latihan-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--card);border-radius:var(--r-md);
+    padding:12px 16px;box-shadow:var(--shadow-sm);
+    font-size:13px;font-weight:700;color:var(--ink);
+  }
+  .waktu-timer{font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--rose-deep);}
+  .waktu-timer.timer-danger{color:var(--clay);animation:tickPulse .5s ease infinite;}
+  @keyframes tickPulse{0%,100%{opacity:1;}50%{opacity:.45;}}
+
+  #questionTimerWrap{
+    height:5px;border-radius:var(--r-pill);
+    background:var(--dusk-soft);
+    overflow:hidden;
+    margin-bottom:12px;
+    flex-shrink:0;
+  }
+  #questionTimerBar{height:100%;width:100%;background:var(--dusk);border-radius:var(--r-pill);}
+
+  .question-counter{
+    font-size:11.5px;font-weight:700;color:var(--ink-faint);
+    text-transform:uppercase;letter-spacing:.5px;
+    margin-bottom:10px;flex-shrink:0;
+  }
+  .question-card{
+    background:var(--card);
+    border-radius:var(--r-lg);
+    padding:22px 20px;
+    box-shadow:var(--shadow-sm);
+    margin-bottom:16px;flex-shrink:0;
+    min-height:88px;
+    display:flex;align-items:center;
+  }
+  .question-text{font-size:16.5px;font-weight:700;color:var(--ink);line-height:1.45;}
+
+  .options-list{display:flex;flex-direction:column;gap:10px;flex-shrink:0;}
+  .option-btn{
+    display:flex;align-items:center;gap:12px;
+    background:var(--card);
+    border:2px solid transparent;
+    border-radius:var(--r-md);
+    padding:13px 15px;
+    text-align:left;cursor:pointer;
+    box-shadow:var(--shadow-sm);
+    transition:transform .12s ease,opacity .2s ease,background .2s ease;
+  }
+  .option-btn:active{transform:scale(0.98);}
+  .option-letter{
+    width:26px;height:26px;flex-shrink:0;
+    border-radius:var(--r-pill);
+    background:var(--dusk-soft);color:var(--dusk-deep);
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:800;
+  }
+  .option-text{font-size:14px;font-weight:600;color:var(--ink);}
+  .option-btn.disabled{pointer-events:none;}
+  .option-btn.disabled:not(.correct):not(.wrong){opacity:.4;}
+  .option-btn.correct{background:var(--sage-soft);border-color:var(--sage);}
+  .option-btn.correct .option-letter{background:var(--sage);color:#fff;}
+  .option-btn.wrong{background:var(--clay-soft);border-color:var(--clay);}
+  .option-btn.wrong .option-letter{background:var(--clay);color:#fff;}
+
+  .game-feedback{
+    margin-top:14px;flex-shrink:0;
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .game-feedback-msg{
+    font-size:13px;font-weight:700;
+    padding:12px 14px;border-radius:var(--r-md);
+    text-align:center;
+  }
+  .game-feedback-msg.correct{background:var(--sage-soft);color:var(--moss-deep);}
+  .game-feedback-msg.wrong{background:var(--clay-soft);color:var(--clay);}
+  .next-btn{margin-top:2px;}
+
+  /* ================= RESULT ================= */
+  #screen-result{align-items:center;justify-content:center;position:relative;padding:20px;}
+  .result-gunungan-bg{
+    position:absolute;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:260px;height:330px;
+    opacity:.08;
+    z-index:0;
+  }
+  .result-content{
+    position:relative;z-index:2;
+    display:flex;flex-direction:column;align-items:center;
+    text-align:center;
+    max-width:340px;
+  }
+  .result-emoji{font-size:56px;margin-bottom:10px;}
+  .result-title{
+    font-family:var(--font-display);
+    font-size:28px;font-weight:600;color:var(--ink);
+    margin-bottom:6px;
+  }
+  .result-subtitle{
+    font-size:13.5px;color:var(--ink-soft);font-weight:500;
+    margin-bottom:22px;line-height:1.5;
+  }
+  .result-score-card{
+    width:100%;
+    background:var(--card);
+    border-radius:var(--r-lg);
+    padding:6px 18px;
+    box-shadow:var(--shadow-md);
+    margin-bottom:24px;
+  }
+  .result-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:13px 0;
+    font-size:13.5px;font-weight:600;color:var(--ink-soft);
+    border-bottom:1px solid var(--paper);
+  }
+  .result-row:last-child{border-bottom:none;}
+  .result-row strong{
+    font-family:var(--font-display);
+    font-size:17px;font-weight:600;color:var(--ink);
+  }
+  .result-buttons{display:flex;gap:10px;width:100%;}
+  .result-buttons button{flex:1;}
+
+</style>
+</head>
+<body>
+<div class="phone-shell">
+  <div class="app" id="app">
+
+    <!-- ============ SPLASH ============ -->
+    <section id="screen-splash" class="screen active">
+      <div class="splash-content">
+        <div class="splash-gunungan-wrap"><div class="gunungan splash-gunungan"></div></div>
+        <h1 class="splash-title">Indonesian<br><em>Battle</em></h1>
+        <p class="splash-tagline">Belajar sambil bertarung ⚔️</p>
+        <div class="splash-loader"><div class="splash-loader-bar"></div></div>
+        <p class="splash-loading-text">Menyiapkan medan pertempuran…</p>
+      </div>
+    </section>
+
+    <!-- ============ HOME ============ -->
+    <section id="screen-home" class="screen">
+      <div class="home-header">
+        <div class="home-header-left">
+          <div class="logo-mark"><div class="gunungan" style="width:100%;height:100%;background:linear-gradient(180deg,var(--gold),var(--dusk));"></div></div>
+          <div>
+            <p class="greeting">Halo, Pejuang! 👋</p>
+            <p class="app-name-small">Indonesian Battle</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-strip">
+        <div class="stat-chip"><span class="stat-value" id="statPoints">0</span><span class="stat-label">Poin</span></div>
+        <div class="stat-chip"><span class="stat-value" id="statGames">0</span><span class="stat-label">Battle</span></div>
+        <div class="stat-chip"><span class="stat-value" id="statWinrate">0%</span><span class="stat-label">Menang</span></div>
+      </div>
+
+      <h2 class="section-title">📚 Pilih Kategori Belajar</h2>
+      <div class="category-grid">
+        <button class="category-card" style="--cat-color:var(--dusk);--cat-soft:var(--dusk-soft);" onclick="openCategory('sejarah')">
+          <div class="category-icon">🏛️</div>
+          <div class="category-info"><h3>Sejarah Indonesia</h3><p>8 soal • Kerajaan &amp; kemerdekaan</p></div>
+          <span class="category-arrow">›</span>
+        </button>
+        <button class="category-card" style="--cat-color:var(--rose);--cat-soft:var(--rose-soft);" onclick="openCategory('budaya')">
+          <div class="category-icon">🎭</div>
+          <div class="category-info"><h3>Budaya &amp; Tradisi</h3><p>8 soal • Tari, wayang, adat</p></div>
+          <span class="category-arrow">›</span>
+        </button>
+        <button class="category-card" style="--cat-color:var(--teal);--cat-soft:var(--teal-soft);" onclick="openCategory('geografi')">
+          <div class="category-icon">🗺️</div>
+          <div class="category-info"><h3>Geografi Nusantara</h3><p>8 soal • Pulau, gunung, laut</p></div>
+          <span class="category-arrow">›</span>
+        </button>
+        <button class="category-card" style="--cat-color:var(--gold);--cat-soft:var(--gold-soft);" onclick="openCategory('bahasa')">
+          <div class="category-icon">💬</div>
+          <div class="category-info"><h3>Bahasa &amp; Sastra</h3><p>6 soal • Bahasa &amp; sastrawan</p></div>
+          <span class="category-arrow">›</span>
+        </button>
+        <button class="category-card" style="--cat-color:var(--moss);--cat-soft:var(--moss-soft);" onclick="openCategory('florafauna')">
+          <div class="category-icon">🦋</div>
+          <div class="category-info"><h3>Flora &amp; Fauna</h3><p>6 soal • Satwa &amp; tumbuhan khas</p></div>
+          <span class="category-arrow">›</span>
+        </button>
+        <button class="category-card" style="--cat-color:var(--coral);--cat-soft:var(--coral-soft);" onclick="openCategory('kuliner')">
+          <div class="category-icon">🍜</div>
+          <div class="category-info"><h3>Kuliner Nusantara</h3><p>6 soal • Makanan khas daerah</p></div>
+          <span class="category-arrow">›</span>
+        </button>
+      </div>
+      <p class="home-footnote">Pilih kategori → baca materi singkat → lanjut battle 🎯</p>
+      <div class="deploy-badges">
+        <a class="deploy-badge github" href="https://github.com/USERNAME/indonesian-battle" target="_blank" rel="noopener">📦 GitHub</a>
+        <a class="deploy-badge vercel" href="https://vercel.com/new/clone?repository-url=https://github.com/USERNAME/indonesian-battle" target="_blank" rel="noopener">▲ Deploy ke Vercel</a>
+      </div>
+    </section>
+
+    <!-- ============ DETAIL ============ -->
+    <section id="screen-detail" class="screen">
+      <div class="sub-header">
+        <button class="back-btn" onclick="goHome()">←</button>
+      </div>
+      <div class="detail-banner" id="detailBanner">
+        <div class="gunungan"></div>
+        <span class="detail-banner-icon" id="detailIcon">🏛️</span>
+      </div>
+      <div class="detail-body">
+        <p class="detail-eyebrow">📖 Materi Belajar</p>
+        <h1 id="detailTitle">Judul Kategori</h1>
+        <div class="reading-content" id="readingContent"></div>
+      </div>
+      <div class="detail-footer">
+        <button class="btn-primary btn-full" onclick="goToModeSelect()">Lanjut ke Mode Permainan →</button>
+      </div>
+    </section>
+
+    <!-- ============ MODE SELECT ============ -->
+    <section id="screen-mode" class="screen">
+      <div class="sub-header">
+        <button class="back-btn" onclick="showScreen('screen-detail')">←</button>
+        <h2>Pilih Mode Permainan</h2>
+      </div>
+      <p class="mode-subtitle">Kategori: <strong id="modeCategoryName">-</strong></p>
+      <div class="mode-list">
+        <button class="mode-card" onclick="selectMode('latihan')">
+          <div class="mode-icon i-latihan">📝</div>
+          <div class="mode-info"><h3>Mode Latihan</h3><p>Belajar santai, tanpa tekanan waktu. Cocok untuk pemula.</p></div>
+          <span class="category-arrow">›</span>
+        </button>
+        <button class="mode-card" onclick="selectMode('bot')">
+          <div class="mode-icon i-bot">🤖</div>
+          <div class="mode-info"><h3>Battle vs Bot</h3><p>Adu cepat &amp; cerdas melawan salah satu dari 3 bot.</p></div>
+          <span class="category-arrow">›</span>
+        </button>
+        <button class="mode-card" onclick="selectMode('waktu')">
+          <div class="mode-icon i-waktu">⏱️</div>
+          <div class="mode-info"><h3>Mode Waktu</h3><p>Jawab sebanyak mungkin dalam 60 detik. Kejar skor tertinggi!</p></div>
+          <span class="category-arrow">›</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============ BOT SELECT ============ -->
+    <section id="screen-bot" class="screen">
+      <div class="sub-header">
+        <button class="back-btn" onclick="showScreen('screen-mode')">←</button>
+        <h2>Pilih Lawan Bot</h2>
+      </div>
+      <div class="bot-list">
+        <button class="bot-card" data-level="mudah" onclick="selectBot(1)">
+          <div class="bot-avatar">🐣</div>
+          <div class="bot-info">
+            <h3>Bobi si Pemula</h3>
+            <p>Masih belajar, sering bingung dan susah menjawab.</p>
+            <span class="bot-difficulty mudah">⭐ Mudah</span>
+          </div>
+        </button>
+        <button class="bot-card" data-level="sedang" onclick="selectBot(2)">
+          <div class="bot-avatar">🦊</div>
+          <div class="bot-info">
+            <h3>Sari si Cerdik</h3>
+            <p>Sedikit pintar dan cukup tangkas, harus waspada!</p>
+            <span class="bot-difficulty sedang">⭐⭐ Sedang</span>
+          </div>
+        </button>
+        <button class="bot-card" data-level="sulit" onclick="selectBot(3)">
+          <div class="bot-avatar">🦉</div>
+          <div class="bot-info">
+            <h3>Master Rangga</h3>
+            <p>Sangat pintar &amp; jenius kuis, hampir tak pernah salah.</p>
+            <span class="bot-difficulty sulit">⭐⭐⭐ Sulit</span>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============ GAME ============ -->
+    <section id="screen-game" class="screen">
+      <div class="game-exit-row"><button class="back-btn" onclick="goHome()" title="Keluar dari battle">✕</button></div>
+      <div class="game-top" id="gameTop"></div>
+      <div id="questionTimerWrap"><div id="questionTimerBar"></div></div>
+      <p class="question-counter" id="questionCounter">Soal 1/8</p>
+      <div class="question-card"><p class="question-text" id="questionText">…</p></div>
+      <div class="options-list" id="optionsList"></div>
+      <div class="game-feedback" id="gameFeedback"></div>
+    </section>
+
+    <!-- ============ RESULT ============ -->
+    <section id="screen-result" class="screen">
+      <div class="gunungan result-gunungan-bg" id="resultGunungan"></div>
+      <div class="result-content">
+        <div class="result-emoji" id="resultEmoji">🏆</div>
+        <h1 class="result-title" id="resultTitle">Kamu Menang!</h1>
+        <p class="result-subtitle" id="resultSubtitle">Ringkasan pertandingan kamu</p>
+        <div class="result-score-card" id="resultScoreCard"></div>
+        <div class="result-buttons">
+          <button class="btn-secondary" onclick="playAgain()">🔄 Main Lagi</button>
+          <button class="btn-primary" onclick="goHome()">🏠 Beranda</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+/* ======================================================================
+   DATA: KATEGORI, MATERI BACAAN, DAN BANK SOAL
+   ====================================================================== */
+var CATEGORIES = [
+  {
+    id:'sejarah',
+    name:'Sejarah Indonesia',
+    icon:'🏛️',
+    bannerFrom:'var(--dusk-soft)', bannerTo:'var(--dusk)',
+    reading:[
+      "Jauh sebelum Indonesia merdeka, Nusantara pernah menjadi rumah bagi kerajaan-kerajaan besar. Kerajaan Sriwijaya menguasai jalur perdagangan maritim, sementara Kerajaan Majapahit di bawah Raja Hayam Wuruk dan Mahapatih Gajah Mada mencapai masa kejayaan lewat cita-cita persatuan Nusantara yang diikrarkan dalam Sumpah Palapa.",
+      "Kekayaan rempah-rempah menarik bangsa Eropa datang ke Nusantara, dimulai dari Portugis, lalu disusul Belanda yang menjajah paling lama. Perlawanan rakyat terus bermunculan, salah satunya Perang Jawa yang dipimpin Pangeran Diponegoro. Semangat persatuan semakin menguat lewat berdirinya Budi Utomo pada 1908 dan ikrar Sumpah Pemuda pada 1928.",
+      "Puncak perjuangan bangsa terjadi pada 17 Agustus 1945, ketika Ir. Soekarno bersama Mohammad Hatta memproklamasikan kemerdekaan Indonesia. Momen inilah yang menandai lahirnya Republik Indonesia sebagai bangsa yang merdeka dan berdaulat."
+    ],
+    questions:[
+      {q:"Siapa yang memproklamasikan kemerdekaan Indonesia pada 17 Agustus 1945?", options:["Soekarno-Hatta","Soedirman","Pangeran Diponegoro","R.A. Kartini"], correct:0},
+      {q:"Kerajaan Hindu-Buddha yang mencapai puncak kejayaan pada masa Raja Hayam Wuruk adalah?", options:["Sriwijaya","Majapahit","Mataram Kuno","Tarumanegara"], correct:1},
+      {q:"Siapa Mahapatih Majapahit yang terkenal dengan Sumpah Palapa?", options:["Ken Arok","Adityawarman","Gajah Mada","Mpu Tantular"], correct:2},
+      {q:"Bangsa Eropa yang pertama kali mendarat di Nusantara mencari rempah-rempah adalah?", options:["Inggris","Belanda","Spanyol","Portugis"], correct:3},
+      {q:"Organisasi pergerakan nasional pertama yang berdiri tahun 1908 disebut?", options:["Budi Utomo","Sarekat Islam","Indische Partij","PNI"], correct:0},
+      {q:"Ikrar pemuda yang menyatukan tekad satu nusa, satu bangsa, satu bahasa diucapkan pada tahun?", options:["1908","1928","1945","1949"], correct:1},
+      {q:"Siapa proklamator sekaligus Presiden pertama Republik Indonesia?", options:["Sutan Sjahrir","Mohammad Hatta","Ir. Soekarno","Soeharto"], correct:2},
+      {q:"Perang besar yang dipimpin Pangeran Diponegoro melawan Belanda (1825-1830) dikenal sebagai Perang?", options:["Perang Padri","Perang Aceh","Perang Bali","Perang Jawa"], correct:3}
+    ]
+  },
+  {
+    id:'budaya',
+    name:'Budaya & Tradisi',
+    icon:'🎭',
+    bannerFrom:'var(--rose-soft)', bannerTo:'var(--rose)',
+    reading:[
+      "Indonesia adalah negeri dengan ribuan suku bangsa yang hidup berdampingan di bawah semboyan Bhinneka Tunggal Ika, berbeda-beda tetapi tetap satu. Keberagaman ini melahirkan kekayaan seni seperti wayang kulit di Jawa, tari Kecak dan upacara Ngaben di Bali, hingga tari Saman yang energik dari Aceh.",
+      "Setiap daerah juga memiliki rumah adat dan alat musik khasnya sendiri, mulai dari Rumah Gadang berukir milik masyarakat Minangkabau hingga angklung dari Jawa Barat yang terbuat dari bambu. Batik, kain bermotif hasil pewarnaan lilin, bahkan telah diakui UNESCO sebagai Warisan Budaya Dunia sejak tahun 2009.",
+      "Semua warisan ini menjadi bukti bahwa keberagaman budaya Indonesia bukan hanya kekayaan, tetapi juga identitas yang mempersatukan bangsa dari Sabang sampai Merauke."
+    ],
+    questions:[
+      {q:"Semboyan negara Indonesia yang berarti berbeda-beda tetapi tetap satu adalah?", options:["Bhinneka Tunggal Ika","Gotong Royong","Pancasila","Garuda Pancasila"], correct:0},
+      {q:"Seni pertunjukan boneka dari kulit kerbau khas Jawa disebut?", options:["Wayang Golek","Wayang Kulit","Ondel-ondel","Reog"], correct:1},
+      {q:"Kain tradisional yang diakui UNESCO sebagai Warisan Budaya Dunia sejak 2009 adalah?", options:["Tenun Ikat","Songket","Batik","Ulos"], correct:2},
+      {q:"Tari Kecak dengan puluhan penari melingkar sambil melantunkan cak berasal dari?", options:["Jawa Tengah","Sumatera Barat","Sulawesi Selatan","Bali"], correct:3},
+      {q:"Rumah adat Gadang beratap melengkung seperti tanduk kerbau berasal dari suku?", options:["Minangkabau","Batak","Bugis","Dayak"], correct:0},
+      {q:"Alat musik dari bambu khas Jawa Barat yang dimainkan dengan cara digoyangkan adalah?", options:["Gamelan","Angklung","Sasando","Kolintang"], correct:1},
+      {q:"Upacara pembakaran jenazah dalam tradisi Hindu Bali disebut?", options:["Nyepi","Melasti","Ngaben","Galungan"], correct:2},
+      {q:"Tari Saman yang dibawakan serentak dan cepat dengan gerakan tangan berasal dari?", options:["Sumatera Utara","Riau","Jambi","Aceh"], correct:3}
+    ]
+  },
+  {
+    id:'geografi',
+    name:'Geografi Nusantara',
+    icon:'🗺️',
+    bannerFrom:'var(--teal-soft)', bannerTo:'var(--teal)',
+    reading:[
+      "Indonesia dikenal sebagai negara kepulauan terbesar di dunia, dengan lebih dari 17.000 pulau yang membentang dari Sabang hingga Merauke. Kalimantan tercatat sebagai pulau terbesar di Indonesia, sementara Puncak Jaya di Papua menjadi titik tertinggi di seluruh negeri.",
+      "Wilayah Indonesia dipisahkan oleh selat-selat penting seperti Selat Sunda antara Sumatera dan Jawa, serta Selat Malaka yang menjadi salah satu jalur pelayaran tersibuk di dunia. Sumatera Utara juga menyimpan Danau Toba, danau vulkanik terbesar di dunia yang terbentuk dari letusan gunung purba.",
+      "Letak geografis Indonesia yang berada di antara dua benua membuatnya dilewati Garis Wallace, garis khayal yang memisahkan wilayah persebaran fauna Asia dan Australia. Secara administratif, negeri ini terbagi menjadi provinsi-provinsi yang masing-masing dipimpin oleh seorang gubernur."
+    ],
+    questions:[
+      {q:"Pulau terbesar di Indonesia adalah?", options:["Sumatera","Kalimantan","Papua","Sulawesi"], correct:1},
+      {q:"Gunung tertinggi di Indonesia yang berada di Papua adalah?", options:["Gunung Kerinci","Gunung Rinjani","Puncak Jaya","Gunung Semeru"], correct:2},
+      {q:"Selat yang memisahkan Pulau Sumatera dan Pulau Jawa adalah?", options:["Selat Sunda","Selat Malaka","Selat Bali","Selat Karimata"], correct:0},
+      {q:"Selat yang memisahkan Sumatera dengan Semenanjung Malaysia adalah?", options:["Selat Sunda","Selat Malaka","Selat Makassar","Selat Lombok"], correct:1},
+      {q:"Danau vulkanik terbesar di dunia yang terletak di Sumatera Utara adalah?", options:["Danau Maninjau","Danau Singkarak","Danau Kelimutu","Danau Toba"], correct:3},
+      {q:"Indonesia dikenal sebagai negara kepulauan terbesar di dunia dengan lebih dari berapa ribu pulau?", options:["5.000 pulau","10.000 pulau","17.000 pulau","25.000 pulau"], correct:2},
+      {q:"Garis khayal yang memisahkan wilayah persebaran fauna Asia dan Australia di Indonesia disebut Garis?", options:["Wallace","Weber","Khatulistiwa","Meridian"], correct:0},
+      {q:"Wilayah administratif tingkat pertama di Indonesia yang dipimpin gubernur disebut?", options:["Kabupaten","Provinsi","Kecamatan","Kelurahan"], correct:1}
+    ]
+  },
+  {
+    id:'bahasa',
+    name:'Bahasa & Sastra',
+    icon:'💬',
+    bannerFrom:'var(--gold-soft)', bannerTo:'var(--gold)',
+    reading:[
+      "Bahasa Indonesia yang kita gunakan sehari-hari berakar dari Bahasa Melayu, yang sejak lama menjadi bahasa perdagangan di Nusantara. Melalui Sumpah Pemuda tahun 1928, para pemuda dari berbagai daerah sepakat menjunjung Bahasa Indonesia sebagai bahasa persatuan.",
+      "Di balik satu bahasa nasional ini, Indonesia menyimpan kekayaan luar biasa berupa ratusan bahasa daerah, diperkirakan lebih dari 700 bahasa yang tersebar di seluruh penjuru negeri. Beberapa daerah bahkan memiliki aksara tradisionalnya sendiri, seperti aksara Hanacaraka untuk menulis Bahasa Jawa.",
+      "Kekayaan bahasa ini melahirkan karya sastra besar, dari puisi penuh semangat karya Chairil Anwar hingga novel-novel Pramoedya Ananta Toer yang dibaca hingga ke mancanegara."
+    ],
+    questions:[
+      {q:"Bahasa Indonesia yang menjadi bahasa persatuan berasal dari rumpun bahasa?", options:["Jawa","Melayu","Sanskerta","Sunda"], correct:1},
+      {q:"Dalam Sumpah Pemuda 1928, bahasa yang dijunjung sebagai bahasa persatuan adalah?", options:["Bahasa Jawa","Bahasa Belanda","Bahasa Indonesia","Bahasa Melayu Tinggi"], correct:2},
+      {q:"Penyair Angkatan 45 yang dijuluki Si Binatang Jalang dan menulis puisi berjudul Aku adalah?", options:["W.S. Rendra","Sapardi Djoko Damono","Taufiq Ismail","Chairil Anwar"], correct:3},
+      {q:"Penulis tetralogi novel Bumi Manusia yang karyanya mendunia adalah?", options:["Ahmad Tohari","Pramoedya Ananta Toer","Andrea Hirata","N.H. Dini"], correct:1},
+      {q:"Selain Bahasa Indonesia, negeri ini memiliki bahasa daerah yang jumlahnya diperkirakan lebih dari?", options:["100 bahasa","300 bahasa","700 bahasa","1.500 bahasa"], correct:2},
+      {q:"Aksara tradisional yang digunakan untuk menulis Bahasa Jawa disebut aksara?", options:["Kawi","Pallawa","Pegon","Hanacaraka"], correct:3}
+    ]
+  },
+  {
+    id:'florafauna',
+    name:'Flora & Fauna',
+    icon:'🦋',
+    bannerFrom:'var(--moss-soft)', bannerTo:'var(--moss)',
+    reading:[
+      "Sebagai negara tropis dengan hutan hujan luas, Indonesia menjadi rumah bagi flora dan fauna unik yang tak ditemukan di tempat lain. Komodo, kadal raksasa purba, hanya hidup di Pulau Komodo dan sekitarnya, sementara Rafflesia arnoldii, bunga tunggal terbesar di dunia, tumbuh di hutan Sumatera.",
+      "Di hutan Sumatera dan Kalimantan, orangutan hidup sebagai primata cerdas yang kini berstatus dilindungi. Jauh di timur Nusantara, burung Cendrawasih dengan bulu warna-warni memukau menghiasi hutan Papua dan dijuluki burung dari Surga.",
+      "Negara ini juga menetapkan tiga bunga nasional lewat Keputusan Presiden, salah satunya melati putih yang mendapat julukan Puspa Bangsa, melambangkan kesucian dan kesederhanaan."
+    ],
+    questions:[
+      {q:"Hewan reptil purba raksasa yang hanya hidup di Pulau Komodo dan sekitarnya disebut?", options:["Biawak Air","Komodo","Buaya Muara","Iguana"], correct:1},
+      {q:"Bunga tunggal terbesar di dunia yang ditemukan di hutan Sumatera adalah?", options:["Bunga Bangkai","Anggrek Bulan","Rafflesia arnoldii","Melati"], correct:2},
+      {q:"Orangutan merupakan hewan endemik yang habitat aslinya berada di pulau?", options:["Jawa dan Bali","Sumatera dan Kalimantan","Papua dan Sulawesi","Lombok dan Sumbawa"], correct:1},
+      {q:"Burung yang menjadi lambang negara Indonesia adalah burung?", options:["Cendrawasih","Merak","Garuda","Elang Jawa"], correct:2},
+      {q:"Bunga melati putih ditetapkan sebagai salah satu bunga nasional dengan sebutan?", options:["Puspa Pesona","Puspa Bangsa","Puspa Langka","Puspa Indonesia"], correct:1},
+      {q:"Burung Cendrawasih yang dijuluki burung dari Surga banyak ditemukan di pulau?", options:["Sumatera","Kalimantan","Sulawesi","Papua"], correct:3}
+    ]
+  },
+  {
+    id:'kuliner',
+    name:'Kuliner Nusantara',
+    icon:'🍜',
+    bannerFrom:'var(--coral-soft)', bannerTo:'var(--coral)',
+    reading:[
+      "Kekayaan rempah Nusantara melahirkan ragam kuliner yang mendunia. Rendang asal Sumatera Barat bahkan pernah dinobatkan sebagai salah satu makanan terlezat di dunia berkat perpaduan bumbu dan santan yang dimasak berjam-jam hingga kering dan meresap.",
+      "Setiap daerah memiliki hidangan khasnya sendiri, seperti Sate Madura dengan bumbu kacangnya, Gudeg manis dari Yogyakarta, hingga Pempek asal Palembang yang disajikan dengan kuah cuko asam pedas.",
+      "Pada masa kolonial, gaya penyajian hidangan Nusantara secara mewah dan berlimpah dikenal oleh orang Belanda dengan istilah rijsttafel, bukti bahwa kuliner Indonesia telah lama memukau dunia."
+    ],
+    questions:[
+      {q:"Makanan khas Padang berbahan dasar daging dan santan yang pernah dinobatkan sebagai makanan terlezat di dunia adalah?", options:["Gulai","Dendeng Balado","Rendang","Sate Padang"], correct:2},
+      {q:"Sate dengan bumbu kacang khas yang berasal dari sebuah pulau di Jawa Timur adalah Sate?", options:["Padang","Madura","Maranggi","Lilit"], correct:1},
+      {q:"Gudeg, makanan manis berbahan dasar nangka muda, adalah makanan khas kota?", options:["Solo","Semarang","Bandung","Yogyakarta"], correct:3},
+      {q:"Pempek, makanan berbahan ikan dan sagu dengan kuah cuko, adalah khas kota?", options:["Medan","Palembang","Makassar","Manado"], correct:1},
+      {q:"Tempe dan tahu, makanan sumber protein populer di Indonesia, terbuat dari bahan dasar?", options:["Kacang Tanah","Jagung","Kedelai","Singkong"], correct:2},
+      {q:"Rijsttafel adalah istilah untuk gaya penyajian hidangan Nusantara yang dikenal pada masa kolonial negara?", options:["Portugis","Inggris","Tiongkok","Belanda"], correct:3}
+    ]
+  }
+];
+
+var BOTS = [
+  {id:1, name:"Bobi si Pemula", avatar:"🐣", accuracy:0.35, minThink:2600, maxThink:5200},
+  {id:2, name:"Sari si Cerdik", avatar:"🦊", accuracy:0.65, minThink:1800, maxThink:3600},
+  {id:3, name:"Master Rangga", avatar:"🦉", accuracy:0.92, minThink:900, maxThink:2200}
+];
+
+var QUESTION_TIME = 15000;
+var STATS_KEY = 'indobattle_stats_v1';
+
+var state = {
+  currentCategory:null,
+  currentMode:null,
+  currentBot:null,
+  questions:[],
+  qIndex:0,
+  playerScore:0,
+  botScore:0,
+  correctCount:0,
+  answered:false,
+  qStartTime:0,
+  qTimeout:null,
+  timerInterval:null,
+  timeLeft:0
+};
+
+/* ======================================================================
+   UTIL
+   ====================================================================== */
+function shuffle(arr){
+  var a = arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t = a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+function prepareQuestion(q){
+  var order = shuffle([0,1,2,3]);
+  var shuffledOptions = order.map(function(i){ return q.options[i]; });
+  var correctShuffledIndex = order.indexOf(q.correct);
+  return {question:q.q, shuffledOptions:shuffledOptions, correctShuffledIndex:correctShuffledIndex};
+}
+
+/* ======================================================================
+   NAVIGASI
+   ====================================================================== */
+function showScreen(id){
+  var screens = document.querySelectorAll('.screen');
+  screens.forEach(function(s){ s.classList.remove('active'); });
+  var el = document.getElementById(id);
+  if(el){ el.classList.add('active'); el.scrollTop = 0; }
+}
+
+function openCategory(id){
+  var cat = CATEGORIES.find(function(c){ return c.id===id; });
+  if(!cat) return;
+  state.currentCategory = cat;
+  document.getElementById('detailTitle').textContent = cat.name;
+  document.getElementById('detailIcon').textContent = cat.icon;
+  document.getElementById('detailBanner').style.background = 'linear-gradient(135deg,'+cat.bannerFrom+','+cat.bannerTo+')';
+  document.getElementById('readingContent').innerHTML = cat.reading.map(function(p){ return '<p>'+p+'</p>'; }).join('');
+  showScreen('screen-detail');
+}
+
+function goToModeSelect(){
+  document.getElementById('modeCategoryName').textContent = state.currentCategory.name;
+  showScreen('screen-mode');
+}
+
+function selectMode(mode){
+  state.currentMode = mode;
+  if(mode==='bot'){ showScreen('screen-bot'); }
+  else { startGame(); }
+}
+
+function selectBot(id){
+  state.currentBot = BOTS.find(function(b){ return b.id===id; });
+  startGame();
+}
+
+function goHome(){
+  if(state.timerInterval){ clearInterval(state.timerInterval); state.timerInterval=null; }
+  if(state.qTimeout){ clearTimeout(state.qTimeout); state.qTimeout=null; }
+  refreshStatsDisplay();
+  showScreen('screen-home');
+}
+
+/* ======================================================================
+   MESIN PERMAINAN
+   ====================================================================== */
+function startGame(){
+  state.qIndex = 0;
+  state.playerScore = 0;
+  state.botScore = 0;
+  state.correctCount = 0;
+  state.answered = false;
+
+  var pool = shuffle(state.currentCategory.questions.slice());
+  var count = state.currentMode==='waktu' ? pool.length : Math.min(8, pool.length);
+  state.questions = pool.slice(0, count).map(prepareQuestion);
+
+  renderGameTopStatic();
+
+  if(state.timerInterval){ clearInterval(state.timerInterval); state.timerInterval=null; }
+
+  if(state.currentMode==='waktu'){
+    startGlobalTimer();
+  } else {
+    document.getElementById('questionTimerWrap').style.display = (state.currentMode==='bot') ? 'block' : 'none';
+  }
+
+  renderQuestion();
+  showScreen('screen-game');
+}
+
+function renderGameTopStatic(){
+  var top = document.getElementById('gameTop');
+  if(state.currentMode==='bot'){
+    top.innerHTML =
+      '<div class="vs-bar">'+
+        '<div class="vs-side"><div class="vs-avatar">🧑</div><span class="vs-name">Kamu</span><span class="vs-score" id="playerScoreDisplay">0</span></div>'+
+        '<div class="vs-mid"><div class="gunungan"></div></div>'+
+        '<div class="vs-side"><div class="vs-avatar" id="botAvatarInGame">'+state.currentBot.avatar+'</div><span class="vs-name">'+state.currentBot.name+'</span><span class="vs-score" id="botScoreDisplay">0</span></div>'+
+      '</div>';
+  } else if(state.currentMode==='waktu'){
+    top.innerHTML =
+      '<div class="waktu-bar"><div class="waktu-timer" id="globalTimerDisplay">1:00</div><div>Skor: <span id="playerScoreDisplay">0</span></div></div>';
+  } else {
+    top.innerHTML =
+      '<div class="latihan-bar"><span>📘 Mode Latihan</span><span>Benar: <span id="correctCountDisplay">0</span>/<span id="totalQDisplay">'+state.questions.length+'</span></span></div>';
+  }
+}
+
+function renderQuestion(){
+  state.answered = false;
+  var q = state.questions[state.qIndex];
+
+  document.getElementById('questionCounter').textContent =
+    'Soal ' + (state.qIndex+1) + (state.currentMode==='waktu' ? '' : ('/'+state.questions.length));
+  document.getElementById('questionText').textContent = q.question;
+
+  var wrap = document.getElementById('optionsList');
+  wrap.innerHTML = q.shuffledOptions.map(function(opt,i){
+    return '<button class="option-btn" onclick="selectAnswer('+i+')"><span class="option-letter">'+String.fromCharCode(65+i)+'</span><span class="option-text">'+opt+'</span></button>';
+  }).join('');
+
+  document.getElementById('gameFeedback').innerHTML = '';
+
+  if(state.qTimeout){ clearTimeout(state.qTimeout); state.qTimeout=null; }
+
+  if(state.currentMode==='bot'){
+    var bar = document.getElementById('questionTimerBar');
+    bar.style.transition = 'none';
+    bar.style.width = '100%';
+    void bar.offsetWidth;
+    bar.style.transition = 'width '+(QUESTION_TIME/1000)+'s linear';
+    bar.style.width = '0%';
+    state.qStartTime = Date.now();
+    state.qTimeout = setTimeout(handleTimeout, QUESTION_TIME);
+  } else {
+    state.qStartTime = Date.now();
+  }
+}
+
+function selectAnswer(idx){
+  if(state.answered) return;
+  state.answered = true;
+  if(state.qTimeout){ clearTimeout(state.qTimeout); state.qTimeout=null; }
+
+  var q = state.questions[state.qIndex];
+  var isCorrect = idx===q.correctShuffledIndex;
+  var pts = 0;
+
+  if(isCorrect){
+    state.correctCount++;
+    if(state.currentMode==='bot'){
+      var elapsed = Date.now()-state.qStartTime;
+      var ratio = Math.max(0,(QUESTION_TIME-elapsed)/QUESTION_TIME);
+      pts = 100 + Math.round(ratio*50);
+    } else {
+      pts = 10;
+    }
+    state.playerScore += pts;
+  }
+
+  highlightOptions(q, idx);
+  updateScoreDisplay();
+  showFeedbackBanner(isCorrect, q, false);
+
+  if(state.currentMode==='bot'){ simulateBotAnswer(); }
+
+  if(state.currentMode==='latihan'){
+    showNextButton();
+  } else if(state.currentMode==='waktu'){
+    state.qTimeout = setTimeout(nextQuestion, 550);
+  } else {
+    state.qTimeout = setTimeout(nextQuestion, 1900);
+  }
+}
+
+function handleTimeout(){
+  if(state.answered) return;
+  state.answered = true;
+  var q = state.questions[state.qIndex];
+  highlightOptions(q, -1);
+  showFeedbackBanner(false, q, true);
+  if(state.currentMode==='bot'){ simulateBotAnswer(); }
+  state.qTimeout = setTimeout(nextQuestion, 1900);
+}
+
+function simulateBotAnswer(){
+  var bot = state.currentBot;
+  var botCorrect = Math.random() < bot.accuracy;
+  var botThink = bot.minThink + Math.random()*(bot.maxThink-bot.minThink);
+  var ratio = Math.max(0,(QUESTION_TIME-botThink)/QUESTION_TIME);
+  var botPts = 0;
+  if(botCorrect){ botPts = 100+Math.round(ratio*50); state.botScore += botPts; }
+
+  setTimeout(function(){
+    updateScoreDisplay();
+    var av = document.getElementById('botAvatarInGame');
+    if(av){
+      av.classList.add(botCorrect ? 'pulse-correct' : 'pulse-wrong');
+      setTimeout(function(){ av.classList.remove('pulse-correct','pulse-wrong'); }, 650);
+    }
+  }, 550);
+}
+
+function highlightOptions(q, chosenIdx){
+  var buttons = document.querySelectorAll('#optionsList .option-btn');
+  buttons.forEach(function(btn,i){
+    btn.classList.add('disabled');
+    btn.onclick = null;
+    if(i===q.correctShuffledIndex){ btn.classList.add('correct'); }
+    else if(i===chosenIdx){ btn.classList.add('wrong'); }
+  });
+}
+
+function showFeedbackBanner(isCorrect, q, timedOut){
+  var el = document.getElementById('gameFeedback');
+  var msg;
+  if(timedOut){
+    msg = '<div class="game-feedback-msg wrong">⏰ Waktu habis! Jawaban benar: '+q.shuffledOptions[q.correctShuffledIndex]+'</div>';
+  } else if(isCorrect){
+    msg = '<div class="game-feedback-msg correct">✅ Benar! Mantap!</div>';
+  } else {
+    msg = '<div class="game-feedback-msg wrong">❌ Kurang tepat. Jawaban benar: '+q.shuffledOptions[q.correctShuffledIndex]+'</div>';
+  }
+  el.innerHTML = msg;
+}
+
+function showNextButton(){
+  var el = document.getElementById('gameFeedback');
+  var isLast = state.qIndex === state.questions.length-1;
+  var btn = document.createElement('button');
+  btn.className = 'btn-primary btn-full next-btn';
+  btn.textContent = isLast ? 'Lihat Hasil →' : 'Lanjut →';
+  btn.onclick = nextQuestion;
+  el.appendChild(btn);
+}
+
+function updateScoreDisplay(){
+  var p=document.getElementById('playerScoreDisplay'); if(p) p.textContent=state.playerScore;
+  var b=document.getElementById('botScoreDisplay'); if(b) b.textContent=state.botScore;
+  var c=document.getElementById('correctCountDisplay'); if(c) c.textContent=state.correctCount;
+}
+
+function nextQuestion(){
+  state.qIndex++;
+  if(state.currentMode==='waktu'){
+    if(state.qIndex >= state.questions.length){
+      state.questions = shuffle(state.currentCategory.questions.slice()).map(prepareQuestion);
+      state.qIndex = 0;
+    }
+    renderQuestion();
+    return;
+  }
+  if(state.qIndex >= state.questions.length){ endGame(); }
+  else { renderQuestion(); }
+}
+
+function startGlobalTimer(){
+  state.timeLeft = 60;
+  var wrap = document.getElementById('questionTimerWrap');
+  wrap.style.display = 'block';
+  var bar = document.getElementById('questionTimerBar');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  void bar.offsetWidth;
+  bar.style.transition = 'width 60s linear';
+  bar.style.width = '0%';
+  updateGlobalTimerDisplay();
+
+  state.timerInterval = setInterval(function(){
+    state.timeLeft--;
+    updateGlobalTimerDisplay();
+    if(state.timeLeft<=0){
+      clearInterval(state.timerInterval);
+      state.timerInterval = null;
+      if(state.qTimeout){ clearTimeout(state.qTimeout); state.qTimeout=null; }
+      endGame();
+    }
+  }, 1000);
+}
+
+function updateGlobalTimerDisplay(){
+  var el = document.getElementById('globalTimerDisplay');
+  if(!el) return;
+  var m = Math.floor(state.timeLeft/60);
+  var s = state.timeLeft%60;
+  el.textContent = m+':'+(s<10?'0':'')+s;
+  if(state.timeLeft<=10){ el.classList.add('timer-danger'); } else { el.classList.remove('timer-danger'); }
+}
+
+function endGame(){
+  if(state.timerInterval){ clearInterval(state.timerInterval); state.timerInterval=null; }
+  if(state.qTimeout){ clearTimeout(state.qTimeout); state.qTimeout=null; }
+
+  var stats = loadStats();
+  stats.gamesPlayed++;
+  stats.totalPoints += state.playerScore;
+
+  var title, subtitle, emoji;
+
+  if(state.currentMode==='bot'){
+    if(state.playerScore > state.botScore){
+      title='Kamu Menang! 🎉'; emoji='🏆';
+      subtitle='Kamu berhasil mengalahkan '+state.currentBot.name+'!';
+      stats.wins++;
+    } else if(state.playerScore < state.botScore){
+      title='Belum Menang'; emoji='💪';
+      subtitle=state.currentBot.name+' menang kali ini. Baca lagi materinya, lalu coba sekali lagi!';
+      stats.losses++;
+    } else {
+      title='Seri!'; emoji='🤝';
+      subtitle='Pertandingan yang sangat ketat melawan '+state.currentBot.name+'!';
+      stats.draws = (stats.draws||0)+1;
+    }
+  } else if(state.currentMode==='waktu'){
+    title='Waktu Habis! ⏱️'; emoji='⏱️';
+    subtitle='Kamu berhasil menjawab benar '+state.correctCount+' soal dalam 60 detik.';
+  } else {
+    title='Latihan Selesai! 📘'; emoji='📘';
+    subtitle='Kamu menjawab benar '+state.correctCount+' dari '+state.questions.length+' soal.';
+  }
+
+  saveStats(stats);
+  renderResultScreen(title, subtitle, emoji);
+  showScreen('screen-result');
+}
+
+function renderResultScreen(title, subtitle, emoji){
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultSubtitle').textContent = subtitle;
+
+  var gun = document.getElementById('resultGunungan');
+  var win = state.currentMode==='bot' ? (state.playerScore > state.botScore) : true;
+  gun.style.background = win ? 'linear-gradient(180deg,var(--gold),var(--rose))' : 'linear-gradient(180deg,var(--ink-faint),var(--ink-soft))';
+
+  var card = document.getElementById('resultScoreCard');
+  var html = '';
+  if(state.currentMode==='bot'){
+    html += '<div class="result-row"><span>🧑 Kamu</span><strong>'+state.playerScore+'</strong></div>';
+    html += '<div class="result-row"><span>'+state.currentBot.avatar+' '+state.currentBot.name+'</span><strong>'+state.botScore+'</strong></div>';
+    html += '<div class="result-row"><span>✅ Jawaban Benar</span><strong>'+state.correctCount+'/'+state.questions.length+'</strong></div>';
+  } else if(state.currentMode==='waktu'){
+    html += '<div class="result-row"><span>⭐ Skor</span><strong>'+state.playerScore+'</strong></div>';
+    html += '<div class="result-row"><span>✅ Benar</span><strong>'+state.correctCount+'</strong></div>';
+  } else {
+    html += '<div class="result-row"><span>✅ Jawaban Benar</span><strong>'+state.correctCount+'/'+state.questions.length+'</strong></div>';
+    html += '<div class="result-row"><span>⭐ Skor</span><strong>'+state.playerScore+'</strong></div>';
+  }
+  card.innerHTML = html;
+  refreshStatsDisplay();
+}
+
+function playAgain(){ startGame(); }
+
+/* ======================================================================
+   STATISTIK (localStorage)
+   ====================================================================== */
+function loadStats(){
+  try{
+    var raw = localStorage.getItem(STATS_KEY);
+    return raw ? JSON.parse(raw) : {gamesPlayed:0,wins:0,losses:0,draws:0,totalPoints:0};
+  }catch(e){
+    return {gamesPlayed:0,wins:0,losses:0,draws:0,totalPoints:0};
+  }
+}
+function saveStats(s){
+  try{ localStorage.setItem(STATS_KEY, JSON.stringify(s)); }catch(e){}
+}
+function refreshStatsDisplay(){
+  var s = loadStats();
+  var pointsEl = document.getElementById('statPoints'); if(pointsEl) pointsEl.textContent = s.totalPoints;
+  var gamesEl = document.getElementById('statGames'); if(gamesEl) gamesEl.textContent = s.gamesPlayed;
+  var wr = s.gamesPlayed ? Math.round((s.wins/s.gamesPlayed)*100) : 0;
+  var wrEl = document.getElementById('statWinrate'); if(wrEl) wrEl.textContent = wr+'%';
+}
+
+/* ======================================================================
+   INIT
+   ====================================================================== */
+document.addEventListener('DOMContentLoaded', function(){
+  refreshStatsDisplay();
+  setTimeout(function(){ showScreen('screen-home'); }, 2600);
+});
+</script>
+</body>
+</html>
